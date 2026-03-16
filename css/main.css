@@ -3,7 +3,7 @@
    Theme: Dark / Spooky — Black, Purple, Cyan
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Raleway:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Raleway:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 /* ── CSS Variables ── */
 :root {
@@ -22,7 +22,7 @@
   --muted:       #7a7a9a;
   --danger:      #ff4466;
   --success:     #00ffaa;
-  --font-spooky: 'Cinzel Decorative', serif;
+  --font-spooky: 'Uncial Antiqua', cursive;
   --font-body:   'Raleway', sans-serif;
   --font-mono:   'Share Tech Mono', monospace;
   --radius:      12px;
@@ -395,9 +395,9 @@ input, textarea, select, button, a, label,
 
 .hero-title {
   font-family: var(--font-spooky);
-  font-size: clamp(2rem, 6vw, 4.5rem);
-  letter-spacing: 3px;
-  line-height: 1.2;
+  font-size: clamp(2.2rem, 7vw, 5rem);
+  letter-spacing: 4px;
+  line-height: 1.15;
   background: linear-gradient(135deg, var(--white) 0%, var(--purple-mid) 50%, var(--cyan) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
