@@ -44,6 +44,15 @@ body {
   cursor: none;
 }
 
+/* Ensure nothing in the background layer ever eats clicks */
+#particles-canvas,
+.cursor,
+.cursor-dot,
+.cursor-ring,
+.page-transition {
+  pointer-events: none !important;
+}
+
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 ul { list-style: none; }
@@ -93,8 +102,16 @@ body:has(button:hover) .cursor-ring {
 ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 3px; }
 
 /* ── Page Wrapper ── */
-.page { position: relative; z-index: 1; min-height: 100vh; }
+.page { position: relative; z-index: 2; min-height: 100vh; }
 .page.hidden { display: none; }
+
+/* Ensure all interactive elements are always clickable */
+input, textarea, select, button, a, label,
+.form-input, .form-textarea, .form-select,
+.vote-btn, .btn, .admin-nav-item, .login-tab {
+  position: relative;
+  z-index: 3;
+}
 
 /* ============================================
    NAVIGATION
@@ -221,6 +238,7 @@ body:has(button:hover) .cursor-ring {
   background: rgba(255,255,255,0.08);
   opacity: 0;
   transition: opacity 0.2s;
+  pointer-events: none;
 }
 .btn:hover::before { opacity: 1; }
 
@@ -327,6 +345,7 @@ body:has(button:hover) .cursor-ring {
   background: radial-gradient(circle at top left, var(--purple-glow), transparent 60%);
   opacity: 0;
   transition: opacity 0.4s;
+  pointer-events: none;
 }
 .card:hover {
   border-color: var(--purple);
@@ -496,12 +515,14 @@ body:has(button:hover) .cursor-ring {
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom, transparent 50%, var(--panel));
+  pointer-events: none;
 }
 .project-thumbnail .thumb-glow {
   position: absolute;
   inset: 0;
   background: radial-gradient(circle, var(--purple-glow) 0%, transparent 70%);
   animation: pulse-slow 3s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .project-body {
