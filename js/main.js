@@ -1,7 +1,3 @@
-// =============================================
-// GHOST'S CREATIONS — Main JS
-// =============================================
-
 // ── State ──────────────────────────────────
 const State = {
   currentUser: null,
@@ -32,7 +28,7 @@ function initRouter() {
       navigateTo(link.dataset.page);
     });
   });
-  // Handle hash on load
+
   const hash = window.location.hash.replace('#', '') || 'home';
   navigateTo(hash, true);
 }
@@ -52,10 +48,8 @@ function navigateTo(pageId, instant = false) {
   const transition = document.querySelector('.page-transition');
 
   const doNavigate = () => {
-    // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
 
-    // Show target
     const target = document.getElementById(`page-${pageId}`);
     if (target) {
       target.classList.remove('hidden');
@@ -64,7 +58,6 @@ function navigateTo(pageId, instant = false) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Update nav active state
     document.querySelectorAll('.nav-links a[data-page]').forEach(a => {
       a.classList.toggle('active', a.dataset.page === pageId);
     });
@@ -85,13 +78,11 @@ function navigateTo(pageId, instant = false) {
 // STATE / PERSISTENCE
 // ============================================
 function loadState() {
-  // Load user
   const savedUser = localStorage.getItem('gc_user');
   if (savedUser) {
     try { State.currentUser = JSON.parse(savedUser); } catch (_) {}
   }
 
-  // Load posts
   const savedPosts = localStorage.getItem('gc_posts');
   if (savedPosts) {
     try { State.posts = JSON.parse(savedPosts); } catch (_) {}
@@ -100,7 +91,6 @@ function loadState() {
     savePosts();
   }
 
-  // Load projects
   const savedProjects = localStorage.getItem('gc_projects');
   if (savedProjects) {
     try { State.projects = JSON.parse(savedProjects); } catch (_) {}
@@ -136,7 +126,6 @@ function initNavbar() {
     document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 30);
   });
 
-  // Mobile hamburger
   const hamburger = document.querySelector('.hamburger');
   const navLinks  = document.querySelector('.nav-links');
   if (hamburger) {
@@ -219,7 +208,7 @@ function loginAsAdmin(e) {
 
   // Mock admin credentials (in production, verify against Deno KV)
   const admins = JSON.parse(localStorage.getItem('gc_admins') || '[]');
-  const defaultAdmins = [{ username: 'Ghost', password: 'ghost123', avatar: '👻' }];
+  const defaultAdmins = [{ username: 'Ghost', password: 'RobloxDeveloperPortal67', avatar: '👻' }];
   const allAdmins = [...defaultAdmins, ...admins];
   const match = allAdmins.find(a => a.username === username && a.password === password);
 

@@ -1,15 +1,7 @@
-// =============================================
-// GHOST'S CREATIONS — API Client
-// js/api.js
-//
-// Update API_BASE with your Deno Deploy URL after deploying server.ts
-// Example: https://ghosts-creations.deno.dev
-// =============================================
-
-const API_BASE = 'https://YOUR_PROJECT.deno.dev'; // ← Update this!
+const API_BASE = 'https://famous-snail-78.ztsohg.deno.net';
 
 // Set to true to use localStorage fallback (for local development)
-const USE_LOCAL = true;
+const USE_LOCAL = false;
 
 // ── Auth Token ──────────────────────────────
 function getAuthToken() {
@@ -26,7 +18,7 @@ function authHeaders() {
 
 // ── API Wrapper ─────────────────────────────
 async function apiRequest(method, path, body = null) {
-  if (USE_LOCAL) return null; // Use localStorage mode
+  if (USE_LOCAL) return null;
 
   try {
     const opts = {
