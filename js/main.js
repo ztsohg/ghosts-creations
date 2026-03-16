@@ -1,3 +1,7 @@
+// =============================================
+// GHOST'S CREATIONS — Main JS
+// =============================================
+
 // ── State ──────────────────────────────────
 const State = {
   currentUser: null,
@@ -28,7 +32,7 @@ function initRouter() {
       navigateTo(link.dataset.page);
     });
   });
-
+  // Handle hash on load
   const hash = window.location.hash.replace('#', '') || 'home';
   navigateTo(hash, true);
 }
@@ -48,8 +52,10 @@ function navigateTo(pageId, instant = false) {
   const transition = document.querySelector('.page-transition');
 
   const doNavigate = () => {
+    // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
 
+    // Show target
     const target = document.getElementById(`page-${pageId}`);
     if (target) {
       target.classList.remove('hidden');
@@ -58,6 +64,7 @@ function navigateTo(pageId, instant = false) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Update nav active state
     document.querySelectorAll('.nav-links a[data-page]').forEach(a => {
       a.classList.toggle('active', a.dataset.page === pageId);
     });
@@ -78,11 +85,13 @@ function navigateTo(pageId, instant = false) {
 // STATE / PERSISTENCE
 // ============================================
 function loadState() {
+  // Load user
   const savedUser = localStorage.getItem('gc_user');
   if (savedUser) {
     try { State.currentUser = JSON.parse(savedUser); } catch (_) {}
   }
 
+  // Load posts
   const savedPosts = localStorage.getItem('gc_posts');
   if (savedPosts) {
     try { State.posts = JSON.parse(savedPosts); } catch (_) {}
@@ -91,6 +100,7 @@ function loadState() {
     savePosts();
   }
 
+  // Load projects
   const savedProjects = localStorage.getItem('gc_projects');
   if (savedProjects) {
     try { State.projects = JSON.parse(savedProjects); } catch (_) {}
@@ -126,6 +136,7 @@ function initNavbar() {
     document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 30);
   });
 
+  // Mobile hamburger
   const hamburger = document.querySelector('.hamburger');
   const navLinks  = document.querySelector('.nav-links');
   if (hamburger) {
@@ -138,6 +149,13 @@ function initNavbar() {
 function renderNavUser() {
   const navActions = document.getElementById('nav-actions');
   if (!navActions) return;
+
+  // Show/hide Admin nav tab based on admin status
+  const adminNavLink = document.getElementById('admin-nav-link');
+  if (adminNavLink) {
+    const adminLi = adminNavLink.closest('li');
+    if (adminLi) adminLi.style.display = State.currentUser?.isAdmin ? '' : 'none';
+  }
 
   if (State.currentUser) {
     navActions.innerHTML = `
@@ -208,7 +226,9 @@ function loginAsAdmin(e) {
 
   // Mock admin credentials (in production, verify against Deno KV)
   const admins = JSON.parse(localStorage.getItem('gc_admins') || '[]');
-  const defaultAdmins = [{ username: 'Ghost', password: 'RobloxDeveloperPortal67', avatar: '👻' }];
+  // Ghost password can be changed via the Admin Accounts panel
+  const ghostPassword = localStorage.getItem('gc_ghost_password') || 'ghost123';
+  const defaultAdmins = [{ username: 'Ghost', password: ghostPassword, avatar: '👻' }];
   const allAdmins = [...defaultAdmins, ...admins];
   const match = allAdmins.find(a => a.username === username && a.password === password);
 
@@ -401,9 +421,14 @@ function castVote(postId, type) {
 // ADMIN PAGE
 // ============================================
 function renderAdminPage() {
+  // Update sidebar username display
+  const display = document.getElementById('admin-username-display');
+  if (display && State.currentUser) display.textContent = 'Logged in as ' + State.currentUser.username;
+
   renderAdminOverview();
   renderAdminPostsTable();
   renderAdminProjectsTable();
+  renderAdminAccountsPanel();
 }
 
 function switchAdminPanel(panelId) {
@@ -572,7 +597,7 @@ function addAdmin(e) {
   if (!username || !password) { showToast('Please fill in all fields', 'error', '⚠️'); return; }
 
   const admins = JSON.parse(localStorage.getItem('gc_admins') || '[]');
-  if (admins.find(a => a.username === username)) {
+  if (admins.find(a => a.username === username) || username === 'Ghost') {
     showToast('That username already exists', 'error', '⚠️');
     return;
   }
@@ -581,6 +606,89 @@ function addAdmin(e) {
   localStorage.setItem('gc_admins', JSON.stringify(admins));
   document.getElementById('add-admin-form').reset();
   showToast(`Admin "${username}" added`, 'success', '✅');
+  renderAdminOverview();
+  renderAdminAccountsPanel();
+}
+
+// ── Render Admin Accounts Panel ──
+function renderAdminAccountsPanel() {
+  const el = document.getElementById('admin-accounts-list');
+  if (!el) return;
+
+  const admins = JSON.parse(localStorage.getItem('gc_admins') || '[]');
+  // Build full list: default Ghost admin + stored admins
+  const defaultAdmin = { username: 'Ghost', avatar: '👻', isDefault: true };
+  const allAdmins = [defaultAdmin, ...admins.map(a => ({ ...a, isDefault: false }))];
+
+  el.innerHTML = allAdmins.map(admin => `
+    <tr id="admin-row-${admin.username}">
+      <td style="font-size:1.4rem; width:44px;">${admin.avatar || '👤'}</td>
+      <td style="color:var(--white); font-weight:600;">
+        ${admin.username}
+        ${admin.isDefault ? '<span class="tag tag-purple" style="font-size:0.65rem; margin-left:0.5rem;">Owner</span>' : ''}
+        ${admin.username === State.currentUser?.username ? '<span class="tag tag-cyan" style="font-size:0.65rem; margin-left:0.5rem;">You</span>' : ''}
+      </td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openChangePassword('${admin.username}', ${admin.isDefault})">🔑 Change Password</button>
+        ${!admin.isDefault ? `<button class="btn btn-danger btn-sm" style="margin-left:0.5rem;" onclick="deleteAdmin('${admin.username}')">Delete</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Change Password Modal ──
+function openChangePassword(username, isDefault) {
+  document.getElementById('chpw-target-username').textContent = username;
+  document.getElementById('chpw-username-input').value = username;
+  document.getElementById('chpw-is-default').value = isDefault ? '1' : '0';
+  document.getElementById('chpw-new').value = '';
+  document.getElementById('chpw-confirm').value = '';
+  document.getElementById('change-pw-modal').classList.add('open');
+}
+
+function closeChangePwModal() {
+  document.getElementById('change-pw-modal').classList.remove('open');
+}
+
+function submitChangePassword(e) {
+  e.preventDefault();
+  const username  = document.getElementById('chpw-username-input').value;
+  const isDefault = document.getElementById('chpw-is-default').value === '1';
+  const newPw     = document.getElementById('chpw-new').value;
+  const confirmPw = document.getElementById('chpw-confirm').value;
+
+  if (!newPw) { showToast('Please enter a new password', 'error', '⚠️'); return; }
+  if (newPw !== confirmPw) { showToast('Passwords do not match', 'error', '⚠️'); return; }
+  if (newPw.length < 6) { showToast('Password must be at least 6 characters', 'error', '⚠️'); return; }
+
+  if (isDefault) {
+    // Store override for default Ghost admin password
+    localStorage.setItem('gc_ghost_password', newPw);
+  } else {
+    const admins = JSON.parse(localStorage.getItem('gc_admins') || '[]');
+    const idx = admins.findIndex(a => a.username === username);
+    if (idx === -1) { showToast('Admin not found', 'error', '⚠️'); return; }
+    admins[idx].password = newPw;
+    localStorage.setItem('gc_admins', JSON.stringify(admins));
+  }
+
+  closeChangePwModal();
+  showToast(`Password updated for ${username}`, 'success', '🔑');
+}
+
+// ── Delete Admin ──
+function deleteAdmin(username) {
+  if (username === State.currentUser?.username) {
+    showToast("You can't delete your own account!", 'error', '⚠️');
+    return;
+  }
+  if (!confirm(`Delete admin "${username}"? This cannot be undone.`)) return;
+
+  const admins = JSON.parse(localStorage.getItem('gc_admins') || '[]');
+  const filtered = admins.filter(a => a.username !== username);
+  localStorage.setItem('gc_admins', JSON.stringify(filtered));
+  showToast(`Admin "${username}" removed`, 'info', '🗑️');
+  renderAdminAccountsPanel();
   renderAdminOverview();
 }
 
